@@ -27,7 +27,7 @@ public class TaskManager {
     private void ensureFolderExists() {
         try {
             Path parentDir = FILE_PATH.getParent();
-            if (parentDir != null && Files.exists(parentDir)) {
+            if (parentDir != null && !Files.exists(parentDir)) {
                 Files.createDirectories(parentDir);
             }
         } catch (IOException ioe) {

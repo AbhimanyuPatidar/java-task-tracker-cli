@@ -7,7 +7,7 @@ public class Main {
             return;
         }
 
-        // TaskManager manager = new TaskManager();
+        new TaskManager();
 
         // Switch-case to be added
     }
