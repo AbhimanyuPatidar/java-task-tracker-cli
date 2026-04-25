@@ -3,6 +3,7 @@
 package com.tasktracker;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +47,34 @@ public class TaskManager {
             }
         } catch (IOException ioe) {
             System.err.println("Failed to create tasks file: " + ioe.getMessage());
+        }
+    }
+
+    private void loadLastId() {
+        try {
+            if (!Files.exists(FILE_PATH)) return;
+
+            byte[] encoded = Files.readAllBytes(FILE_PATH);
+            String json = new String(encoded, StandardCharsets.UTF_8);
+
+            // Logic to parse the string
+            int keyIndex = json.indexOf("\"lastId\"");
+            int colonIndex = json.indexOf(":", keyIndex);
+            int commaIndex = json.indexOf(",", colonIndex);
+            int braceIndex = json.indexOf("}", colonIndex);
+
+            // Choose the end of the lastId integer
+            int endIndex;
+            if (commaIndex != -1 && (braceIndex == -1 || commaIndex < braceIndex)) {
+                endIndex = commaIndex;
+            } else {
+                endIndex = braceIndex;
+            }
+
+            String value = json.substring(colonIndex+1, endIndex).trim();
+            this.lastId = Integer.parseInt(value);
+        } catch (IOException ioe) {
+            System.out.println("Error loading tasks: " + ioe.getMessage());
         }
     }
 }
