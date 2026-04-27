@@ -11,6 +11,8 @@ public class Task {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    public Task() {} // To be used during loading and parsing of Json string
+
     public Task(int id, String description) {
         this.id = id;
         this.description = description;
