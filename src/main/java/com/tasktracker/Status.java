@@ -31,4 +31,10 @@ public enum Status {
 
         return null;
     }
+
+    public static Status fromJsonValue(String value) {
+        String normalized = value.trim().toUpperCase().replace("-", "_");
+
+        return Status.valueOf(normalized);
+    }
 }
