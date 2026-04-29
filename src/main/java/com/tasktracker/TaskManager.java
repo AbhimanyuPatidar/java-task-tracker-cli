@@ -102,7 +102,7 @@ public class TaskManager {
 
             // Find the array of tasks bound by []
             int arrayStart = json.indexOf("[");
-            int arrayEnd = json.indexOf("]");
+            int arrayEnd = json.length() -2;
             if (arrayStart == -1 || arrayEnd == -1) return null;
 
             tasksArray = json.substring(arrayStart +1, arrayEnd);
@@ -143,11 +143,11 @@ public class TaskManager {
     private Task parseSingleTask(String taskToken) {
         Task task = new Task();
 
-        int idIdx = taskToken.indexOf("\"id\"");
-        int descIdx = taskToken.indexOf("\"description\"");
-        int statusIdx = taskToken.indexOf("\"status\"");
-        int createdAtIdx = taskToken.indexOf("\"createdAt\"");
-        int updatedAtIdx = taskToken.indexOf("\"updatedAt\"");
+        int idIdx = taskToken.indexOf("\n\"id\"\n");
+        int descIdx = taskToken.indexOf("\n\"description\"\n");
+        int statusIdx = taskToken.indexOf("\n\"status\"\n");
+        int createdAtIdx = taskToken.indexOf("\n\"createdAt\"\n");
+        int updatedAtIdx = taskToken.indexOf("\n\"updatedAt\"\n");
 
         int start = -1, end = -1;
         
@@ -164,6 +164,8 @@ public class TaskManager {
         end = statusIdx;
         String descStr = taskToken.substring(start, end).trim();
         descStr = descStr.substring(1, descStr.length() -2);
+        descStr.replace("\0", "{");
+        descStr.replace("\7", "}");
         task.setDescription(descStr);
 
         // Extract and set value of status
