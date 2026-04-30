@@ -16,17 +16,56 @@ public class TaskManager {
     private static final String PROJECT_ROOT = System.getProperty("user.dir");
     private static final Path FILE_PATH = Paths.get(PROJECT_ROOT, "data", "tasks.json");
 
-    private List<Task> tasks; // Arraylist to store all the tasks objects.
-    private int lastId; // Will hold the last used task id.
+    static List<Task> tasks; // Arraylist to store all the tasks objects.
+    static int lastId; // Will hold the last used task id.
+
+    private TaskService taskService = new TaskService();
 
     public TaskManager() {
-        this.tasks = new ArrayList<>();
-        this.lastId = 0;
+        TaskManager.tasks = new ArrayList<>();
+        TaskManager.lastId = 0;
 
         ensureFolderExists();
         ensureFileExists();
         loadLastId();
         loadTasks();
+    }
+
+    public void add(String description, Status status) {
+        int nextId = ++lastId;
+        taskService.addTask(nextId, description, status);
+    }
+
+    public void update(int id, String description, Status status) {
+        taskService.updateTask(id, description, status);
+    }
+
+    public void delete(int id) {
+        taskService.deleteTask(id);
+    }
+
+    public void markInProgress(int id) {
+        taskService.markTaskInProgress(id);
+    }
+
+    public void markDone(int id) {
+        taskService.markTaskDone(id);
+    }
+
+    public void listAll() {
+        taskService.listAllTasks();
+    }
+
+    public void listDone() {
+        taskService.listDoneTasks();
+    }
+
+    public void listNotDone() {
+        taskService.listNotDoneTasks();
+    }
+
+    public void listInProgress() {
+        taskService.listInProgressTasks();
     }
 
     private void ensureFolderExists() {
@@ -76,7 +115,7 @@ public class TaskManager {
             }
 
             String value = json.substring(colonIndex+1, endIndex).trim();
-            this.lastId = Integer.parseInt(value);
+            TaskManager.lastId = Integer.parseInt(value);
         } catch (IOException ioe) {
             System.out.println("Error loading tasks: " + ioe.getMessage());
         }
@@ -164,8 +203,7 @@ public class TaskManager {
         end = statusIdx;
         String descStr = taskToken.substring(start, end).trim();
         descStr = descStr.substring(1, descStr.length() -2);
-        descStr.replace("\0", "{");
-        descStr.replace("\7", "}");
+        descStr = descStr.replace("\0", "{").replace("\7", "}");
         task.setDescription(descStr);
 
         // Extract and set value of status
