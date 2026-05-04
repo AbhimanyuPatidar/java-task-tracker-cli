@@ -5,6 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 
 public class TaskService {
+    private TaskManager manager;
+
+    public TaskService(TaskManager manager) {
+        this.manager = manager;
+    }
+
     public void addTask(int id, String description, Status status) {
         Task task = new Task(id, description);
 
@@ -12,7 +18,7 @@ public class TaskService {
             task.setStatus(status);
         }
 
-        TaskManager.tasks.add(task);
+        manager.getTasks().add(task);
         System.out.println("Task added successfully (id=" + task.getId() + ")");
     }
 
@@ -34,7 +40,7 @@ public class TaskService {
     }
 
     public void deleteTask(int id) {
-        Iterator<Task> iterator = TaskManager.tasks.iterator();
+        Iterator<Task> iterator = manager.getTasks().iterator();
 
         while (iterator.hasNext()) {
             Task task = iterator.next();
@@ -75,7 +81,7 @@ public class TaskService {
     }
 
     public void listAllTasks() {
-        printTasks(TaskManager.tasks);
+        printTasks(manager.getTasks());
     }
 
     public void listDoneTasks() {
@@ -83,7 +89,7 @@ public class TaskService {
     }
 
     public void listNotDoneTasks() {
-        if (TaskManager.tasks.isEmpty()) {
+        if (manager.getTasks().isEmpty()) {
             System.out.println("No tasks found.");
             return;
         }
@@ -91,7 +97,7 @@ public class TaskService {
         StringBuilder output = new StringBuilder();
         int count = 0;
 
-        for (Task task : TaskManager.tasks) {
+        for (Task task : manager.getTasks()) {
             if (task.getStatus() != Status.DONE) {
                 output.append(formatTask(task)).append(System.lineSeparator());
                 count++;
@@ -111,7 +117,7 @@ public class TaskService {
     }
 
     private void printTasksByStatus(Status status) {
-        if (TaskManager.tasks.isEmpty()) {
+        if (manager.getTasks().isEmpty()) {
             System.out.println("No tasks found.");
             return;
         }
@@ -119,7 +125,7 @@ public class TaskService {
         StringBuilder output = new StringBuilder();
         int count = 0;
 
-        for (Task task : TaskManager.tasks) {
+        for (Task task : manager.getTasks()) {
             if (task.getStatus() == status) {
                 output.append(formatTask(task)).append(System.lineSeparator());
                 count++;
@@ -154,7 +160,7 @@ public class TaskService {
     }
 
     private Task findTaskById(int id) {
-        for (Task task : TaskManager.tasks) {
+        for (Task task : manager.getTasks()) {
             if (task.getId() == id) {
                 return task;
             }

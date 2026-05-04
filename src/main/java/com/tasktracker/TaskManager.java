@@ -16,19 +16,32 @@ public class TaskManager {
     private static final String PROJECT_ROOT = System.getProperty("user.dir");
     private static final Path FILE_PATH = Paths.get(PROJECT_ROOT, "data", "tasks.json");
 
-    static List<Task> tasks; // Arraylist to store all the tasks objects.
-    static int lastId; // Will hold the last used task id.
+    private List<Task> tasks; // Arraylist to store all the tasks objects.
+    private int lastId; // Will hold the last used task id.
 
-    private TaskService taskService = new TaskService();
+    private TaskService taskService;
 
     public TaskManager() {
-        TaskManager.tasks = new ArrayList<>();
-        TaskManager.lastId = 0;
+        this.tasks = new ArrayList<>();
+        this.lastId = 0;
+        this.taskService = new TaskService(this);
 
         ensureFolderExists();
         ensureFileExists();
         loadLastId();
         loadTasks();
+    }
+
+    public List<Task> getTasks() {
+        return tasks;
+    }
+
+    public int getLastId() {
+        return lastId;
+    }
+
+    public void setLastId(int lastId) {
+        this.lastId = lastId;
     }
 
     public void add(String description, Status status) {
@@ -115,7 +128,7 @@ public class TaskManager {
             }
 
             String value = json.substring(colonIndex+1, endIndex).trim();
-            TaskManager.lastId = Integer.parseInt(value);
+            this.lastId = Integer.parseInt(value);
         } catch (IOException ioe) {
             System.out.println("Error loading tasks: " + ioe.getMessage());
         }
@@ -175,7 +188,7 @@ public class TaskManager {
         while (iterator.hasNext()) {
             String taskToken = iterator.next();
             Task task = parseSingleTask(taskToken);
-            tasks.add(task);
+            this.tasks.add(task);
         }
     }
 
