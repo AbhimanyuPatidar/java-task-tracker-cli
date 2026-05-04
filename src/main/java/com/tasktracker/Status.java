@@ -37,4 +37,26 @@ public enum Status {
 
         return Status.valueOf(normalized);
     }
+
+    public static Status fromCliValue(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        try {
+            int code = Integer.parseInt(trimmed);
+            return findStatus(code);
+        } catch (NumberFormatException nfe) {
+            try {
+                return fromJsonValue(trimmed);
+            } catch (IllegalArgumentException iae) {
+                return null;
+            }
+        }
+    }
 }

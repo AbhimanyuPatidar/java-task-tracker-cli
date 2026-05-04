@@ -21,35 +21,33 @@ public class Main {
 
                 Status addStatus = null;
                 int addDescriptionEnd = args.length;
-                if (args.length > 2) {
-                    String addLastArg = args[args.length - 1];
-
-                    try {
-                        int statusCode = Integer.parseInt(addLastArg);
-
-                        addStatus = Status.findStatus(statusCode);
-                        if (addStatus == null) {
-                            System.out.println("Invalid status code: " + addLastArg + ". Use 1, 2, or 3.");
-                            return;
-                        }
-
-                        addDescriptionEnd = args.length - 1;
-                    } catch (NumberFormatException nfe) {
-                        try {
-                            addStatus = Status.fromJsonValue(addLastArg);
-                            addDescriptionEnd = args.length - 1;
-                        } catch (IllegalArgumentException ignored) {
-                            addStatus = null;
-                        }
+                String addLastArg = args[args.length - 1];
+                for (int i = 1; i < args.length - 1; i++) {
+                    if (args[i].startsWith("--status=")) {
+                        System.out.println("Invalid placement of --status flag. Use it as the last argument.");
+                        printUsage();
+                        return;
                     }
+                }
+                if (addLastArg.startsWith("--status=")) {
+                    String addStatusValue = addLastArg.substring("--status=".length());
+                    addStatus = Status.fromCliValue(addStatusValue);
+                    if (addStatus == null) {
+                        System.out.println("Invalid status value: " + addStatusValue + ". Use 1, 2, 3, todo, in-progress, or done.");
+                        return;
+                    }
+                    addDescriptionEnd = args.length - 1;
+                } else if (addLastArg.startsWith("--")) {
+                    System.out.println("Unknown flag: " + addLastArg);
+                    printUsage();
+                    return;
                 }
 
                 StringBuilder addDescriptionBuilder = new StringBuilder();
                 for (int i = 1; i < addDescriptionEnd; i++) {
-                    if (i > 1) {
+                    if (addDescriptionBuilder.length() > 0) {
                         addDescriptionBuilder.append(" ");
                     }
-
                     addDescriptionBuilder.append(args[i]);
                 }
 
@@ -84,35 +82,33 @@ public class Main {
 
                 Status updateStatus = null;
                 int updateDescriptionEnd = args.length;
-                if (args.length > 3) {
-                    String updateLastArg = args[args.length - 1];
-
-                    try {
-                        int statusCode = Integer.parseInt(updateLastArg);
-
-                        updateStatus = Status.findStatus(statusCode);
-                        if (updateStatus == null) {
-                            System.out.println("Invalid status code: " + updateLastArg + ". Use 1, 2, or 3.");
-                            return;
-                        }
-
-                        updateDescriptionEnd = args.length - 1;
-                    } catch (NumberFormatException nfe) {
-                        try {
-                            updateStatus = Status.fromJsonValue(updateLastArg);
-                            updateDescriptionEnd = args.length - 1;
-                        } catch (IllegalArgumentException ignored) {
-                            updateStatus = null;
-                        }
+                String updateLastArg = args[args.length - 1];
+                for (int i = 2; i < args.length - 1; i++) {
+                    if (args[i].startsWith("--status=")) {
+                        System.out.println("Invalid placement of --status flag. Use it as the last argument.");
+                        printUsage();
+                        return;
                     }
+                }
+                if (updateLastArg.startsWith("--status=")) {
+                    String updateStatusValue = updateLastArg.substring("--status=".length());
+                    updateStatus = Status.fromCliValue(updateStatusValue);
+                    if (updateStatus == null) {
+                        System.out.println("Invalid status value: " + updateStatusValue + ". Use 1, 2, 3, todo, in-progress, or done.");
+                        return;
+                    }
+                    updateDescriptionEnd = args.length - 1;
+                } else if (updateLastArg.startsWith("--")) {
+                    System.out.println("Unknown flag: " + updateLastArg);
+                    printUsage();
+                    return;
                 }
 
                 StringBuilder updateDescriptionBuilder = new StringBuilder();
                 for (int i = 2; i < updateDescriptionEnd; i++) {
-                    if (i > 2) {
+                    if (updateDescriptionBuilder.length() > 0) {
                         updateDescriptionBuilder.append(" ");
                     }
-
                     updateDescriptionBuilder.append(args[i]);
                 }
 
@@ -223,8 +219,8 @@ public class Main {
     private static void printUsage() {
         System.out.println("Usage: task-cli <command>");
         System.out.println("Commands:");
-        System.out.println("  add <description> [status]");
-        System.out.println("  update <id> <description> [status]");
+        System.out.println("  add <description> [--status=<value>]");
+        System.out.println("  update <id> <description> [--status=<value>]");
         System.out.println("  delete <id>");
         System.out.println("  mark-in-progress <id>");
         System.out.println("  mark-done <id>");
