@@ -47,17 +47,33 @@ public class FileTaskRepository implements TaskRepository {
 
     private String serializeTask(Task task) {
         StringBuilder sb = new StringBuilder();
-        String escapedDescription = task.getDescription().replace("{", "\0").replace("}", "\7");
+        String escapedDescription = escapeDescriptionForStorage(task.getDescription());
         sb.append("{\n");
-            sb.append("\"id\":\n").append(task.getId()).append(",\n");
-            sb.append("\"description\":\n\"").append(escapedDescription).append("\",\n");
-            sb.append("\"status\":\n\"").append(task.getStatus().getDisplayValue()).append("\",\n");
-            sb.append("\"createdAt\":\n\"").append(task.getCreatedAt()).append("\"");
+        sb.append("\"id\":\n").append(task.getId()).append(",\n");
+        sb.append("\"description\":\n\"").append(escapedDescription).append("\",\n");
+        sb.append("\"status\":\n\"").append(task.getStatus().getDisplayValue()).append("\",\n");
+        sb.append("\"createdAt\":\n\"").append(task.getCreatedAt()).append("\"");
         if (task.getUpdatedAt() != null) {
-                sb.append(",\n\"updatedAt\":\n\"").append(task.getUpdatedAt()).append("\"");
+            sb.append(",\n\"updatedAt\":\n\"").append(task.getUpdatedAt()).append("\"");
         }
         sb.append("\n}");
         return sb.toString();
+    }
+
+    private String escapeDescriptionForStorage(String description) {
+        return description
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("{", "\0")
+            .replace("}", "\7");
+    }
+
+    private String unescapeDescriptionFromStorage(String description) {
+        return description
+            .replace("\0", "{")
+            .replace("\7", "}")
+            .replace("\\\"", "\"")
+            .replace("\\\\", "\\");
     }
 
     private void ensureFolderExists() {
@@ -156,38 +172,44 @@ public class FileTaskRepository implements TaskRepository {
     private Task parseSingleTask(String taskToken) {
         Task task = new Task();
 
-            int idIdx = taskToken.indexOf("\n\"id\":\n");
-            int descIdx = taskToken.indexOf("\n\"description\":\n");
-            int statusIdx = taskToken.indexOf("\n\"status\":\n");
-            int createdAtIdx = taskToken.indexOf("\n\"createdAt\":\n");
-            int updatedAtIdx = taskToken.indexOf("\n\"updatedAt\":\n");
+        final String idMarker = "\n\"id\":\n";
+        final String descriptionMarker = "\n\"description\":\n";
+        final String statusMarker = "\n\"status\":\n";
+        final String createdAtMarker = "\n\"createdAt\":\n";
+        final String updatedAtMarker = "\n\"updatedAt\":\n";
+
+        int idIdx = taskToken.indexOf(idMarker);
+        int descIdx = taskToken.indexOf(descriptionMarker);
+        int statusIdx = taskToken.indexOf(statusMarker);
+        int createdAtIdx = taskToken.indexOf(createdAtMarker);
+        int updatedAtIdx = taskToken.indexOf(updatedAtMarker);
 
         int start, end;
 
         // Extract and set value of id
-            start = idIdx + 7;
+        start = idIdx + idMarker.length();
         end = descIdx;
         String idStr = taskToken.substring(start, end).trim();
         idStr = idStr.substring(0, idStr.length() - 1);
         task.setId(Integer.parseInt(idStr));
 
         // Extract and set value of description
-            start = descIdx + 16;
+        start = descIdx + descriptionMarker.length();
         end = statusIdx;
         String descStr = taskToken.substring(start, end).trim();
         descStr = descStr.substring(1, descStr.length() - 2);
-        descStr = descStr.replace("\0", "{").replace("\7", "}");
+        descStr = unescapeDescriptionFromStorage(descStr);
         task.setDescription(descStr);
 
         // Extract and set value of status
-            start = statusIdx + 11;
+        start = statusIdx + statusMarker.length();
         end = createdAtIdx;
         String statusStr = taskToken.substring(start, end).trim();
         statusStr = statusStr.substring(1, statusStr.length() - 2);
         task.setStatus(Status.fromJsonValue(statusStr));
 
         // Extract and set value of createdAt
-            start = createdAtIdx + 14;
+        start = createdAtIdx + createdAtMarker.length();
         if (updatedAtIdx == -1) end = taskToken.length();
         else end = updatedAtIdx;
         String createdAtStr = taskToken.substring(start, end).trim();
@@ -197,7 +219,7 @@ public class FileTaskRepository implements TaskRepository {
 
         // Extract and set value of updatedAt if present
         if (updatedAtIdx != -1) {
-                start = updatedAtIdx + 14;
+            start = updatedAtIdx + updatedAtMarker.length();
             end = taskToken.length();
             String updatedAtStr = taskToken.substring(start, end).trim();
             updatedAtStr = updatedAtStr.substring(1, updatedAtStr.length() - 1);
