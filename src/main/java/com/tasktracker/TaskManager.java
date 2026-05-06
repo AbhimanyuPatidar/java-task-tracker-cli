@@ -75,11 +75,11 @@ public class TaskManager {
         taskService.listDoneTasks();
     }
 
-    public void listNotDone() {
-        taskService.listNotDoneTasks();
-    }
-
     public void listInProgress() {
         taskService.listInProgressTasks();
+    }
+
+    public void listTodo() {
+        taskService.listTodoTasks();
     }
 }

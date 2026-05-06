@@ -22,25 +22,9 @@ public class Main {
                 Status addStatus = null;
                 int addDescriptionEnd = args.length;
                 String addLastArg = args[args.length - 1];
-                for (int i = 1; i < args.length - 1; i++) {
-                    if (args[i].startsWith("--status=")) {
-                        System.out.println("Invalid placement of --status flag. Use it as the last argument.");
-                        printUsage();
-                        return;
-                    }
-                }
-                if (addLastArg.startsWith("--status=")) {
-                    String addStatusValue = addLastArg.substring("--status=".length());
-                    addStatus = Status.fromCliValue(addStatusValue);
-                    if (addStatus == null) {
-                        System.out.println("Invalid status value: " + addStatusValue + ". Use 1, 2, 3, todo, in-progress, or done.");
-                        return;
-                    }
+                addStatus = Status.fromCliValue(addLastArg);
+                if (addStatus != null) {
                     addDescriptionEnd = args.length - 1;
-                } else if (addLastArg.startsWith("--")) {
-                    System.out.println("Unknown flag: " + addLastArg);
-                    printUsage();
-                    return;
                 }
 
                 StringBuilder addDescriptionBuilder = new StringBuilder();
@@ -83,25 +67,9 @@ public class Main {
                 Status updateStatus = null;
                 int updateDescriptionEnd = args.length;
                 String updateLastArg = args[args.length - 1];
-                for (int i = 2; i < args.length - 1; i++) {
-                    if (args[i].startsWith("--status=")) {
-                        System.out.println("Invalid placement of --status flag. Use it as the last argument.");
-                        printUsage();
-                        return;
-                    }
-                }
-                if (updateLastArg.startsWith("--status=")) {
-                    String updateStatusValue = updateLastArg.substring("--status=".length());
-                    updateStatus = Status.fromCliValue(updateStatusValue);
-                    if (updateStatus == null) {
-                        System.out.println("Invalid status value: " + updateStatusValue + ". Use 1, 2, 3, todo, in-progress, or done.");
-                        return;
-                    }
+                updateStatus = Status.fromCliValue(updateLastArg);
+                if (updateStatus != null) {
                     updateDescriptionEnd = args.length - 1;
-                } else if (updateLastArg.startsWith("--")) {
-                    System.out.println("Unknown flag: " + updateLastArg);
-                    printUsage();
-                    return;
                 }
 
                 StringBuilder updateDescriptionBuilder = new StringBuilder();
@@ -171,43 +139,28 @@ public class Main {
                 break;
 
             case "list":
-                if (args.length != 1) {
-                    System.out.println("Invalid number of arguments for 'list'. Expected 1, got " + args.length + ".");
+                if (args.length == 1) {
+                    taskManager.listAll();
+                } else if (args.length == 2) {
+                    String filter = args[1].toLowerCase();
+                    switch (filter) {
+                        case "done":
+                            taskManager.listDone();
+                            break;
+                        case "todo":
+                            taskManager.listTodo();
+                            break;
+                        case "in-progress":
+                            taskManager.listInProgress();
+                            break;
+                        default:
+                            System.out.println("Unknown list filter: " + args[1]);
+                            printUsage();
+                    }
+                } else {
+                    System.out.println("Invalid number of arguments for 'list'. Expected 1 or 2, got " + args.length + ".");
                     printUsage();
-                    return;
                 }
-
-                taskManager.listAll();
-                break;
-
-            case "list-done":
-                if (args.length != 1) {
-                    System.out.println("Invalid number of arguments for 'list-done'. Expected 1, got " + args.length + ".");
-                    printUsage();
-                    return;
-                }
-
-                taskManager.listDone();
-                break;
-
-            case "list-not-done":
-                if (args.length != 1) {
-                    System.out.println("Invalid number of arguments for 'list-not-done'. Expected 1, got " + args.length + ".");
-                    printUsage();
-                    return;
-                }
-
-                taskManager.listNotDone();
-                break;
-
-            case "list-in-progress":
-                if (args.length != 1) {
-                    System.out.println("Invalid number of arguments for 'list-in-progress'. Expected 1, got " + args.length + ".");
-                    printUsage();
-                    return;
-                }
-
-                taskManager.listInProgress();
                 break;
 
             default:
@@ -219,16 +172,14 @@ public class Main {
     private static void printUsage() {
         System.out.println("Usage: task-cli <command>");
         System.out.println("Commands:");
-        System.out.println("  add <description> [--status=<value>]");
-        System.out.println("  update <id> <description> [--status=<value>]");
+        System.out.println("  add <description> [status]");
+        System.out.println("  update <id> <description> [status]");
         System.out.println("  delete <id>");
         System.out.println("  mark-in-progress <id>");
         System.out.println("  mark-done <id>");
-        System.out.println("  list");
-        System.out.println("  list-done");
-        System.out.println("  list-not-done");
-        System.out.println("  list-in-progress");
+        System.out.println("  list [done|todo|in-progress]");
         System.out.println("Status values: 1 | 2 | 3 | todo | in-progress | done");
+        System.out.println("Note: Use double quotes for multi-word descriptions.");
         
     }
 }

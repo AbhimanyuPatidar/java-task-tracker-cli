@@ -93,32 +93,12 @@ public class TaskService {
         printTasksByStatus(Status.DONE);
     }
 
-    public void listNotDoneTasks() {
-        if (manager.getTasks().isEmpty()) {
-            System.out.println("No tasks found.");
-            return;
-        }
-
-        StringBuilder output = new StringBuilder();
-        int count = 0;
-
-        for (Task task : manager.getTasks()) {
-            if (task.getStatus() != Status.DONE) {
-                output.append(formatTask(task)).append(System.lineSeparator());
-                count++;
-            }
-        }
-
-        if (count == 0) {
-            System.out.println("No tasks found.");
-            return;
-        }
-
-        System.out.print(output.toString());
-    }
-
     public void listInProgressTasks() {
         printTasksByStatus(Status.IN_PROGRESS);
+    }
+
+    public void listTodoTasks() {
+        printTasksByStatus(Status.TODO);
     }
 
     private void printTasksByStatus(Status status) {

@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileTaskRepository implements TaskRepository {
-    private static final String PROJECT_ROOT = System.getProperty("user.dir");
-    private static final Path FILE_PATH = Paths.get(PROJECT_ROOT, "data", "tasks.json");
+    private static final Path FILE_PATH = Paths.get("tasks.json");
 
     @Override
     public TaskRepositoryState loadState() {
-        ensureFolderExists();
         ensureFileExists();
 
         int lastId = loadLastId();
@@ -27,8 +25,6 @@ public class FileTaskRepository implements TaskRepository {
     @Override
     public void saveState(TaskRepositoryState state) {
         try {
-            ensureFolderExists();
-
             StringBuilder tasksJson = new StringBuilder();
             List<Task> tasks = state.getTasks();
             for (int i = 0; i < tasks.size(); i++) {
@@ -74,17 +70,6 @@ public class FileTaskRepository implements TaskRepository {
             .replace("\7", "}")
             .replace("\\\"", "\"")
             .replace("\\\\", "\\");
-    }
-
-    private void ensureFolderExists() {
-        try {
-            Path parentDir = FILE_PATH.getParent();
-            if (parentDir != null && !Files.exists(parentDir)) {
-                Files.createDirectories(parentDir);
-            }
-        } catch (IOException ioe) {
-            System.err.println("Failed to create data directory: " + ioe.getMessage());
-        }
     }
 
     private void ensureFileExists() {
