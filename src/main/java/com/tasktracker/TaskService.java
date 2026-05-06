@@ -11,7 +11,7 @@ public class TaskService {
         this.manager = manager;
     }
 
-    public void addTask(int id, String description, Status status) {
+    public boolean addTask(int id, String description, Status status) {
         Task task = new Task(id, description);
 
         if (status != null) {
@@ -20,14 +20,15 @@ public class TaskService {
 
         manager.getTasks().add(task);
         System.out.println("Task added successfully (id=" + task.getId() + ")");
+        return true;
     }
 
-    public void updateTask(int id, String description, Status status) {
+    public boolean updateTask(int id, String description, Status status) {
         Task task = findTaskById(id);
 
         if (task == null) {
             System.out.println("Task not found for id=" + id);
-            return;
+            return false;
         }
 
         task.setDescription(description);
@@ -37,9 +38,10 @@ public class TaskService {
         task.setUpdatedAt(LocalDateTime.now());
 
         System.out.println("Task updated successfully (id=" + id + ")");
+        return true;
     }
 
-    public void deleteTask(int id) {
+    public boolean deleteTask(int id) {
         Iterator<Task> iterator = manager.getTasks().iterator();
 
         while (iterator.hasNext()) {
@@ -47,37 +49,40 @@ public class TaskService {
             if (task.getId() == id) {
                 iterator.remove();
                 System.out.println("Task deleted successfully (id=" + id + ")");
-                return;
+                return true;
             }
         }
 
         System.out.println("Task not found for id=" + id);
+        return false;
     }
 
-    public void markTaskInProgress(int id) {
+    public boolean markTaskInProgress(int id) {
         Task task = findTaskById(id);
 
         if (task == null) {
             System.out.println("Task not found for id=" + id);
-            return;
+            return false;
         }
 
         task.setStatus(Status.IN_PROGRESS);
         task.setUpdatedAt(LocalDateTime.now());
         System.out.println("Task marked in-progress (id=" + id + ")");
+        return true;
     }
 
-    public void markTaskDone(int id) {
+    public boolean markTaskDone(int id) {
         Task task = findTaskById(id);
 
         if (task == null) {
             System.out.println("Task not found for id=" + id);
-            return;
+            return false;
         }
 
         task.setStatus(Status.DONE);
         task.setUpdatedAt(LocalDateTime.now());
         System.out.println("Task marked done (id=" + id + ")");
+        return true;
     }
 
     public void listAllTasks() {
